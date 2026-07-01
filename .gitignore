@@ -20,6 +20,8 @@ __pycache__
 venv
 backend/icams.db
 backend/.env
+deploy/.env
+.env
 
 # Editor directories and files
 .vscode/*

@@ -80,3 +80,14 @@ alembic downgrade -1              # annuler la dernière
 **Frontend** : React 19, TypeScript, Vite, Tailwind CSS 4, Dexie (cache offline)
 
 **Backend** : Python, FastAPI, SQLAlchemy, Alembic, PostgreSQL (Docker), Pydantic
+
+## Déploiement VPS (Hostinger)
+
+Voir [deploy/DEPLOY.md](deploy/DEPLOY.md) pour le guide complet.
+
+```bash
+git clone https://github.com/bloomarone-dot/Icams.git
+cd Icams
+cp deploy/.env.example .env   # éditer mot de passe + URL
+bash deploy/deploy.sh
+```
