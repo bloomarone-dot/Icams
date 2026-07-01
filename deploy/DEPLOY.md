@@ -67,20 +67,50 @@ bash deploy/deploy.sh
 sudo bash deploy/setup-host-nginx.sh
 ```
 
+## 4. Mises à jour
+
 ```bash
 cd /var/www/icams
 bash deploy/deploy.sh
 ```
 
-## 5. HTTPS (optionnel)
+## 5. Nom de domaine
 
-Avec un domaine Hostinger pointant vers le VPS :
+### Étape A — DNS (hPanel Hostinger)
+
+1. hPanel → **Domaines** → votre domaine → **DNS / Zone DNS**
+2. Ajoutez un enregistrement **A** :
+   - **Nom** : `icams` (ou `@` pour la racine)
+   - **Pointe vers** : IP de votre VPS
+   - TTL : 3600
+
+Résultat : `icams.votredomaine.com` → IP du VPS
+
+Vérification (depuis le VPS ou votre PC) :
+```bash
+dig +short icams.votredomaine.com
+# doit afficher l'IP du VPS
+```
+
+### Étape B — Configurer ICAMS
 
 ```bash
 cd /var/www/icams
-docker compose -f docker-compose.prod.yml stop web
-certbot certonly --standalone -d icams.votredomaine.com
+git pull origin main
+chmod +x deploy/setup-domain.sh
+sudo bash deploy/setup-domain.sh icams.votredomaine.com
 ```
+
+### Vérifier ce qui utilise l'IP / les ports
+
+```bash
+cd /var/www/icams
+bash deploy/check-ports.sh
+```
+
+> **Important** : une même IP peut héberger **plusieurs sites** via nginx.
+> Chaque domaine a son `server_name` — ils ne se bloquent pas entre eux.
+> Seul le **port 80/443** doit être géré par **un seul** nginx (déjà le cas chez vous).
 
 ## Structure sur le VPS
 
