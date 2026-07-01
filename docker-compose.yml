@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: icams-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: icams
+      POSTGRES_PASSWORD: icams
+      POSTGRES_DB: icams
+    ports:
+      - "5434:5432"
+    volumes:
+      - icams_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U icams -d icams"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  icams_pg_data:
