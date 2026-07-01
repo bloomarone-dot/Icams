@@ -42,8 +42,11 @@ POSTGRES_USER=icams
 POSTGRES_PASSWORD=MonMotDePasseSecurise123!
 POSTGRES_DB=icams
 CORS_ORIGINS=http://123.45.67.89
-HTTP_PORT=80
+HTTP_PORT=8080
 ```
+
+> **Port 80 déjà pris ?** Hostinger a souvent nginx/apache sur le port 80.
+> Mettez `HTTP_PORT=8080` puis : `sudo bash deploy/setup-host-nginx.sh`
 
 ## 3. Lancer l'application
 
@@ -53,9 +56,16 @@ chmod +x deploy/deploy.sh
 bash deploy/deploy.sh
 ```
 
-L'app est sur **http://VOTRE_IP** (port 80).
+L'app est sur **http://VOTRE_IP** (port 80 via nginx hôte, ou `:8080` si nginx non configuré).
 
-## 4. Mises à jour
+### Si erreur « port 80 already in use »
+
+```bash
+cd /var/www/icams
+nano .env                    # HTTP_PORT=8080
+bash deploy/deploy.sh
+sudo bash deploy/setup-host-nginx.sh
+```
 
 ```bash
 cd /var/www/icams

@@ -35,6 +35,17 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+# Détecter conflit port 80
+HTTP_PORT_VAL="$(grep -E '^HTTP_PORT=' .env | cut -d= -f2 | tr -d ' \r' || echo 8080)"
+if [ "${HTTP_PORT_VAL}" = "80" ] && ss -tlnp 2>/dev/null | grep -q ':80 '; then
+  echo ""
+  echo ">>> ATTENTION : le port 80 est déjà utilisé sur ce VPS."
+  echo ">>> Modifiez .env : HTTP_PORT=8080"
+  echo ">>> Puis : bash deploy/setup-host-nginx.sh"
+  echo ""
+  exit 1
+fi
+
 echo ">>> Pull dernières modifications..."
 git pull origin main
 
