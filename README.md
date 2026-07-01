@@ -86,8 +86,9 @@ alembic downgrade -1              # annuler la dernière
 Voir [deploy/DEPLOY.md](deploy/DEPLOY.md) pour le guide complet.
 
 ```bash
-git clone https://github.com/bloomarone-dot/Icams.git
-cd Icams
+cd /var/www
+git clone https://github.com/bloomarone-dot/Icams.git icams
+cd icams
 cp deploy/.env.example .env   # éditer mot de passe + URL
 bash deploy/deploy.sh
 ```

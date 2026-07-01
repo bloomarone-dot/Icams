@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
-# Déploiement ICAMS sur VPS Hostinger (Ubuntu)
+# Déploiement ICAMS sur VPS Hostinger (Ubuntu) — dossier /var/www/icams
 set -euo pipefail
 
+INSTALL_DIR="/var/www/icams"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [ "$ROOT" != "$INSTALL_DIR" ]; then
+  echo "Attention : le déploiement doit se faire depuis ${INSTALL_DIR}"
+  echo "Emplacement actuel : ${ROOT}"
+  echo "Utilisez : cd ${INSTALL_DIR} && bash deploy/deploy.sh"
+  exit 1
+fi
+
 cd "$ROOT"
 
-echo "=== ICAMS — déploiement production ==="
+echo "=== ICAMS — déploiement production (${INSTALL_DIR}) ==="
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "Installation de Docker..."
@@ -22,7 +31,7 @@ fi
 if [ ! -f .env ]; then
   echo "Création du fichier .env depuis deploy/.env.example"
   cp deploy/.env.example .env
-  echo ">>> Éditez .env (mot de passe DB, CORS_ORIGINS) puis relancez: bash deploy/deploy.sh"
+  echo ">>> Éditez ${INSTALL_DIR}/.env puis relancez: bash deploy/deploy.sh"
   exit 1
 fi
 
@@ -37,5 +46,6 @@ docker compose -f docker-compose.prod.yml ps
 
 echo ""
 echo "=== Déploiement terminé ==="
-echo "Application : http://$(curl -s ifconfig.me 2>/dev/null || echo 'VOTRE_IP')"
-echo "API docs    : http://$(curl -s ifconfig.me 2>/dev/null || echo 'VOTRE_IP')/docs"
+IP="$(curl -s --max-time 5 ifconfig.me 2>/dev/null || echo 'VOTRE_IP')"
+echo "Application : http://${IP}"
+echo "API docs    : http://${IP}/docs"
