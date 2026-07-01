@@ -1,33 +1,13 @@
 #!/usr/bin/env bash
-# Configure Nginx système (port 80) → ICAMS Docker (port 8080)
+# Configure Nginx système (port 80/443) → ICAMS Docker
 set -euo pipefail
 
 INSTALL_DIR="/var/www/icams"
-CONF_SRC="${INSTALL_DIR}/deploy/nginx/icams-host.conf"
-CONF_DST="/etc/nginx/sites-available/icams"
+DOMAIN="${1:-icams.bloomarone.com}"
 
 if [ "$(id -u)" -ne 0 ]; then
-  echo "Lancez avec sudo : sudo bash deploy/setup-host-nginx.sh"
+  echo "Lancez avec sudo : sudo bash deploy/setup-host-nginx.sh [domaine]"
   exit 1
 fi
 
-if [ ! -f "$CONF_SRC" ]; then
-  echo "Fichier introuvable : $CONF_SRC"
-  exit 1
-fi
-
-# Désactiver le site par défaut s'il occupe le port 80
-if [ -L /etc/nginx/sites-enabled/default ]; then
-  echo ">>> Désactivation du site nginx default..."
-  rm -f /etc/nginx/sites-enabled/default
-fi
-
-cp "$CONF_SRC" "$CONF_DST"
-ln -sf "$CONF_DST" /etc/nginx/sites-enabled/icams
-
-nginx -t
-systemctl reload nginx
-
-echo "=== Nginx configuré ==="
-echo "Port 80 (nginx hôte) → http://127.0.0.1:8080 (Docker icams-web)"
-echo "Vérifiez que .env contient : HTTP_PORT=8080"
+bash "${INSTALL_DIR}/deploy/apply-nginx.sh" "${DOMAIN}"

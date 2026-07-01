@@ -27,31 +27,8 @@ else
   echo "CORS_ORIGINS=https://${DOMAIN},http://${DOMAIN}" >> .env
 fi
 
-# Nginx avec server_name
-cat > /etc/nginx/sites-available/icams <<EOF
-server {
-    listen 80;
-    listen [::]:80;
-    server_name ${DOMAIN};
-
-    client_max_body_size 50M;
-
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-}
-EOF
-
-ln -sf /etc/nginx/sites-available/icams /etc/nginx/sites-enabled/icams
-rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
-
-nginx -t
-systemctl reload nginx
+# Nginx avec server_name — config complète via apply-nginx.sh
+bash "${INSTALL_DIR}/deploy/apply-nginx.sh" "${DOMAIN}"
 
 docker compose -f docker-compose.prod.yml restart api
 
@@ -65,6 +42,8 @@ read -r -p "Installer HTTPS avec Let's Encrypt ? (o/n) " REPLY
 if [[ "$REPLY" =~ ^[oOyY] ]]; then
   apt-get install -y certbot python3-certbot-nginx
   certbot --nginx -d "${DOMAIN}" --non-interactive --agree-tos -m "admin@${DOMAIN}" || certbot --nginx -d "${DOMAIN}"
+  # Réappliquer les routes /api (certbot peut écraser la config)
+  bash "${INSTALL_DIR}/deploy/apply-nginx.sh" "${DOMAIN}"
   sed -i "s|^CORS_ORIGINS=.*|CORS_ORIGINS=https://${DOMAIN}|" .env
   docker compose -f docker-compose.prod.yml restart api
   echo "HTTPS activé : https://${DOMAIN}"

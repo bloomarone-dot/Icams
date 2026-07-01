@@ -53,14 +53,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function checkApiHealth(): Promise<boolean> {
-  try {
-    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) })
-    if (!res.ok) return false
-    const data = await res.json()
-    return data.status === 'ok'
-  } catch {
-    return false
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(10000) })
+      if (!res.ok) continue
+      const data = await res.json()
+      if (data.status === 'ok') return true
+    } catch {
+      /* retry */
+    }
   }
+  return false
 }
 
 export async function fetchBootstrap(): Promise<BootstrapData> {
